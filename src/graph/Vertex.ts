@@ -30,6 +30,7 @@ class Vertex {
     protected is_active = false;
     protected _coords: Coords = { x: 0, y: 0 };
     protected _charge = 0;
+    protected _isotope = 0;
     protected _label = "";
     protected _computed_label = "";
     protected _element: ChemicalElement | null = ChemicalElements["C"];
@@ -49,6 +50,7 @@ class Vertex {
         v._label = this.label;
         v._element = this._element;
         v._charge = this._charge;
+        v._isotope = this._isotope;
         v._h_count = this._h_count;
         v.id = this.id;
         v.topology = this.topology;
@@ -89,6 +91,7 @@ class Vertex {
     }
 
     public set label(label: string) {
+        this._isotope = 0;
         if (label == "") {
             this._element = ChemicalElements["C"];
             if (this.neighbors.size)
@@ -189,6 +192,15 @@ class Vertex {
     public set charge(charge: number) {
         this._charge = charge;
         this.compute_h_count();
+        this.update();
+    }
+
+    public get isotope(): number {
+        return this._isotope;
+    }
+
+    public set isotope(isotope: number) {
+        this._isotope = isotope;
         this.update();
     }
 
@@ -341,6 +353,33 @@ class Vertex {
         this._reposition_charge_group(stylesheet, charge_group);
         this.group?.add(charge_group);
     }
+    private _draw_isotope(stylesheet: Stylesheet) {
+        if (!this._isotope) {
+            const isotope_group = <Konva.Group>this.group?.findOne("#isotope_group");
+            if (isotope_group) {
+                isotope_group.destroyChildren();
+                isotope_group.destroy();
+            }
+            return;
+        }
+
+
+        const isotope_group = <Konva.Group>this.group?.findOne("#isotope_group") || new Konva.Group({
+            id: "isotope_group",
+        });
+        const isotope_text = <Konva.Text>this.group?.findOne("#isotope_text") || new Konva.Text({
+            id: "isotope_text",
+            align: "center",
+        });
+        isotope_text.setAttr("x", 4);
+        isotope_text.setAttr("y", 2);
+        isotope_text.setAttr("text", this.isotope ? `${this.isotope}` : "");
+        isotope_text.setAttr("fill", this.is_active ? stylesheet.atom_active_label_color : stylesheet.atom_label_color);
+        isotope_text.setAttr("fontFamily", stylesheet.atom_font_family);
+        isotope_text.setAttr("fontSize", stylesheet.atom_charge_font_size);
+        isotope_group.add(isotope_text);
+        this.group?.add(isotope_group);
+    }
 
     update() {
         if (this._neighbors.size && this._label == "C")
@@ -393,6 +432,7 @@ class Vertex {
             this.group.add(active_box);
         }
         this._draw_charge(stylesheet);
+        this._draw_isotope(stylesheet);
         this.group.getStage() && this.group.draw();
     }
 
