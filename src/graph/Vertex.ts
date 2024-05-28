@@ -371,8 +371,8 @@ class Vertex {
             id: "isotope_text",
             align: "center",
         });
-        isotope_text.setAttr("x", 4);
-        isotope_text.setAttr("y", 2);
+        isotope_text.setAttr("x", -10);
+        isotope_text.setAttr("y", -10);
         isotope_text.setAttr("text", this.isotope ? `${this.isotope}` : "");
         isotope_text.setAttr("fill", this.is_active ? stylesheet.atom_active_label_color : stylesheet.atom_label_color);
         isotope_text.setAttr("fontFamily", stylesheet.atom_font_family);
@@ -382,8 +382,10 @@ class Vertex {
     }
 
     update() {
-        if (this._neighbors.size && this._label == "C")
+        if (this._neighbors.size && this._isotope == 0 && this._label == "C")
             this._label = "";
+        if (this._isotope != 0 && this._label == "")
+            this._label = "C";
         if (!this.group || !this.controller)
             return;
         this.group.draggable(this._neighbors.size <= 1);
