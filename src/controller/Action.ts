@@ -398,6 +398,7 @@ class ChangeVertexIsotopeAction extends UpdatableAction {
     }
     _set_isotope(isotope: number) {
         this.vertex.isotope = isotope;
+        this.vertex.update();
         this.graph.find_edges_by_vertex(this.vertex).forEach(e => { this.graph.update_edge_orientation(e, false); e.update(); });
     }
     commit() {
